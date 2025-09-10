@@ -1,0 +1,150 @@
+---
+title: "Homework3"
+format: html
+editor: visual
+---
+
+# ST558 - Homework 3 - Evan Gray
+
+# Task 1: Control Flow Practice
+
+## Import data
+
+-   hw2_list.rda stored in wd()
+-   view structure
+
+```{r}
+load("hw2_list.rda") #creates bp_list
+str(bp_list)
+
+```
+
+## Create status column
+
+-   1 for each data frame in bp_list
+-   check that it was created properly
+
+```{r}
+bp_list$treatment$status <- character(20) #20 obs
+bp_list$placebo$status <- character(10) #10 obs
+
+head(bp_list$treatment)
+head(bp_list$placebo)
+```
+
+## Write a for loop to populate the new columns
+
+**Optimal \<= 120, Borderline 121 - 130, High \> 130**
+
+### Treatment dataframe
+
+```{r}
+#create vector for loop values
+treatmentloop <- vector()
+#perform loop
+for (i in seq_len(nrow(bp_list$treatment))){
+                              if (bp_list$treatment[i,3] <= 120) {
+                                    treatmentloop[i] <- "Optimal"
+                                  }
+                              else if (bp_list$treatment[i,3] >= 121 & bp_list$treatment[i,3] <= 130 ) {
+                                      treatmentloop[i] <- "Borderline"
+                                    }
+                              else if (bp_list$treatment[i,3] > 130) {
+                                      treatmentloop[i] <- "High"
+                                    } 
+                              else {
+                                     treatmentloop[i] <- "Other"
+                                    }
+                                  }
+#pass treatmentloop vector to treatment dataframe
+bp_list$treatment$status <- treatmentloop
+bp_list$treatment
+
+```
+
+### Placebo dataframe
+
+```{r}
+#create vector for loop values
+placeboloop <- vector()
+#perform loop
+for (i in seq_len(nrow(bp_list$placebo))){
+                              if (bp_list$placebo[i,3] <= 120) {
+                                    placeboloop[i] <- "Optimal"
+                                  }
+                              else if (bp_list$placebo[i,3] >= 121 & bp_list$placebo[i,3] <= 130 ) {
+                                      placeboloop[i] <- "Borderline"
+                                    }
+                              else if (bp_list$placebo[i,3] > 130) {
+                                      placeboloop[i] <- "High"
+                                    } 
+                              else {
+                                     placeboloop[i] <- "Other"
+                                    }
+                                  }
+#pass placeboloop vector to placebo dataframe
+bp_list$placebo$status <- placeboloop
+bp_list$placebo
+```
+
+# Task 2: Function Writing
+
+## Requirements:
+
+-   list must have exactly 2 objects, named "treatment" and "placebo"
+-   default statistic (type) is set to "mean"
+-   six statistics are presented as named lists identifying the type, column, and source (treatment vs placebo)
+
+```{r}
+testfx <- function(list,type = "mean"){
+  if("treatment" != names(list[1]) | "placebo" != names(list[2]) | length(list) != 2){
+    stop("not a valid list")
+  }
+  #use switch to implement logic
+  # create result vectors for treatment and placebo dataframes, num. columns 2-4
+ treatmentresults<-   switch(type,
+            mean = sapply(bp_list$treatment[,2:4],mean),
+            var = sapply(bp_list$treatment[,2:4],var),
+            sd = sapply(bp_list$treatment[,2:4],sd),
+            min = sapply(bp_list$treatment[,2:4],min),
+            max = sapply(bp_list$treatment[,2:4],max)
+          )
+ placeboresults<-   switch(type,
+            mean = sapply(bp_list$placebo[,2:4],mean),
+            var = sapply(bp_list$placebo[,2:4],var),
+            sd = sapply(bp_list$placebo[,2:4],sd),
+            min = sapply(bp_list$placebo[,2:4],min),
+            max = sapply(bp_list$placebo[,2:4],max)
+          )
+ #results should be a list with names that change dynamically based on the function type parameter
+ resultlist <- list(treatmentresults, placeboresults)
+ names(resultlist) <- c(paste(type," Treatment"),paste(type," Placebo"))
+ return(resultlist)
+}
+```
+
+## Testing output for each type possibility
+```{r}
+testfx(bp_list)
+```
+
+```{r}
+testfx(bp_list, type = "mean")
+```
+
+```{r}
+testfx(bp_list, type = "var")
+```
+
+```{r}
+testfx(bp_list, type = "sd")
+```
+
+```{r}
+testfx(bp_list, type = "min")
+```
+
+```{r}
+testfx(bp_list, type = "max")
+```
+
